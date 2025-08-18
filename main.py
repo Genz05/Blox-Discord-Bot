@@ -4,7 +4,11 @@ import os
 
 TOKEN = os.getenv("DISCORD_TOKEN")
 
-bot = commands.Bot(command_prefix="!", intents=discord.Intents.all())
+intents = discord.Intents.default()
+intents.message_content = True 
+intents.members = True         
+
+bot = commands.Bot(command_prefix="!", intents=intents)
 
 frutas = {
     "dragon": {"loja": 3500000, "trade": 27000000},
