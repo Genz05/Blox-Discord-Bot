@@ -1,5 +1,6 @@
 
 Sobre o Projeto
+
 Este é um bot para Discord criado em Python utilizando a biblioteca discord.py. Sua principal função é fornecer informações sobre o valor de frutas do jogo Blox Fruits, permitindo aos usuários consultar seus preços na loja e em trades, além de comparar valores entre diferentes frutas.
 
 Funcionalidades
