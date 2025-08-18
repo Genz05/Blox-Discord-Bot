@@ -70,6 +70,14 @@ async def valor(ctx, fruta: str):
     else:
         await ctx.send("❌ Fruta não encontrada.")
 
+@bot.command(name="list")
+async def list_frutas(ctx):
+    lista_de_frutas = "Aqui estão todas as frutas disponíveis:\n\n"
+    for fruta in frutas.keys():
+        lista_de_frutas += f"• {fruta.title()}\n"
+    
+    await ctx.send(lista_de_frutas)
+
 @bot.command()
 async def comparar(ctx, fruta1: str, fruta2: str):
     fruta1, fruta2 = fruta1.lower(), fruta2.lower()
