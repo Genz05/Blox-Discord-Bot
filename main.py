@@ -52,7 +52,15 @@ frutas = {
     "yeti": {"loja": 5000000, "trade": 140000000},
     "kitsune": {"loja": 8000000, "trade": 255000000},
     "eastdragon": {"loja": 15000000, "trade": 1020000000},
-    "westdragon": {"loja": 15000000, "trade": 1275000000}
+    "westdragon": {"loja": 15000000, "trade": 1275000000},
+    "fastboats": {"loja": 350, "trade": 120000000},
+    "2xmastery": {"loja": 450, "trade": 180000000},
+    "2xmoney": {"loja": 450, "trade": 180000000},
+    "+1fruitstorage": {"loja": 400, "trade": 190000000},
+    "legendaryscrolls": {"loja": 800, "trade": 230000000},
+    "mythicalscrolls": {"loja": 1500: , "trade": 400000000},
+    "darkblade": {"loja": 1200, "trade": 510000000},
+    "fruitnotifier": {"loja": 2700, "trade": 1450000000}
 }
 
 @bot.event
@@ -82,7 +90,7 @@ def calcular_valor_total(lista_frutas):
     
 @bot.command(name="list")
 async def list_frutas(ctx):
-    lista_de_frutas = "Aqui estão todas as frutas disponíveis:\n\n"
+    lista_de_frutas = "Aqui estão todas as frutas/gamepasses disponíveis:\n\n"
     for fruta in frutas.keys():
         lista_de_frutas += f"• {fruta.title()}\n"
     
