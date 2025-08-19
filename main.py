@@ -87,12 +87,16 @@ def calcular_valor_total(lista_frutas):
             frutas_encontradas.append(fruta_limpa.title())
     return valor_total, frutas_encontradas
 
+# --- Autocomplete Function ---
+async def fruta_autocomplete(interaction: discord.Interaction, current: str):
+    return [
+        app_commands.Choice(name=nome.title(), value=nome)
+        for nome in frutas.keys() if current.lower() in nome.lower()
+    ][:25]
+
 # --- Slash Commands ---
 @bot.tree.command(name="valor", description="Mostra o valor de uma fruta na loja e nas trades.")
-@app_commands.autocomplete(fruta=lambda _, current: [
-    app_commands.Choice(name=nome.title(), value=nome)
-    for nome in frutas.keys() if current.lower() in nome.lower()
-][:25])
+@app_commands.autocomplete(fruta=fruta_autocomplete)
 async def valor(interaction: discord.Interaction, fruta: str):
     fruta = fruta.lower()
     if fruta in frutas:
