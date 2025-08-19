@@ -58,7 +58,7 @@ frutas = {
     "2xmoney": {"loja": 450, "trade": 180000000},
     "+1fruitstorage": {"loja": 400, "trade": 190000000},
     "legendaryscrolls": {"loja": 800, "trade": 230000000},
-    "mythicalscrolls": {"loja": 1500: , "trade": 400000000},
+    "mythicalscrolls": {"loja": 1500, "trade": 400000000},
     "darkblade": {"loja": 1200, "trade": 510000000},
     "fruitnotifier": {"loja": 2700, "trade": 1450000000}
 }
