@@ -1,14 +1,27 @@
 import discord
-from discord.ext import commands
+from discord import app_commands
 import os
 
 TOKEN = os.getenv("DISCORD_TOKEN")
 
 intents = discord.Intents.default()
-intents.message_content = True 
-intents.members = True         
+intents.message_content = True
+intents.members = True
 
-bot = commands.Bot(command_prefix="!", intents=intents)
+class MyBot(discord.Client):
+    def __init__(self):
+        super().__init__(intents=intents)
+        self.tree = app_commands.CommandTree(self)
+
+    async def on_ready(self):
+        print(f"✅ Bot conectado como {self.user}")
+        try:
+            synced = await self.tree.sync()
+            print(f"📡 {len(synced)} comandos sincronizados com o Discord.")
+        except Exception as e:
+            print(f"Erro ao sincronizar comandos: {e}")
+
+bot = MyBot()
 
 frutas = {
     "rocket": {"loja": 5000, "trade": 5000},
@@ -63,71 +76,50 @@ frutas = {
     "fruitnotifier": {"loja": 2700, "trade": 1450000000}
 }
 
-@bot.event
-async def on_ready():
-    print(f"✅ Bot conectado como {bot.user}")
-
-@bot.command()
-async def valor(ctx, fruta: str):
-    fruta = fruta.lower()
-    if fruta in frutas:
-        dados = frutas[fruta]
-        await ctx.send(
-            f"📦 **{fruta.title()}**\n💰 Loja: {dados['loja']}\n🔄 Trade: {dados['trade']}"
-        )
-    else:
-        await ctx.send("❌ Fruta não encontrada.")
-        
+# --- Funções utilitárias ---
 def calcular_valor_total(lista_frutas):
     valor_total = 0
     frutas_encontradas = []
     for fruta in lista_frutas:
-        fruta_limpa = fruta.strip().lower() 
+        fruta_limpa = fruta.strip().lower()
         if fruta_limpa in frutas:
             valor_total += frutas[fruta_limpa]["trade"]
             frutas_encontradas.append(fruta_limpa.title())
     return valor_total, frutas_encontradas
-    
-@bot.command(name="list")
-async def list_frutas(ctx):
+
+# --- Slash Commands ---
+@bot.tree.command(name="valor", description="Mostra o valor de uma fruta na loja e nas trades.")
+@app_commands.autocomplete(fruta=lambda _, current: [
+    app_commands.Choice(name=nome.title(), value=nome)
+    for nome in frutas.keys() if current.lower() in nome.lower()
+][:25])
+async def valor(interaction: discord.Interaction, fruta: str):
+    fruta = fruta.lower()
+    if fruta in frutas:
+        dados = frutas[fruta]
+        await interaction.response.send_message(
+            f"📦 **{fruta.title()}**\n💰 Loja: {dados['loja']}\n🔄 Trade: {dados['trade']}"
+        )
+    else:
+        await interaction.response.send_message("❌ Fruta não encontrada.")
+
+@bot.tree.command(name="list", description="Lista todas as frutas e gamepasses disponíveis.")
+async def list_frutas(interaction: discord.Interaction):
     lista_de_frutas = "Aqui estão todas as frutas/gamepasses disponíveis:\n\n"
     for fruta in frutas.keys():
         lista_de_frutas += f"• {fruta.title()}\n"
-    
-    await ctx.send(lista_de_frutas)
+    await interaction.response.send_message(lista_de_frutas)
 
+@bot.tree.command(name="comparar", description="Compara o valor de frutas de dois lados de uma troca.")
+async def comparar(interaction: discord.Interaction, lado1: str, lado2: str):
+    frutas_player1 = [f for f in lado1.split() if f != '-']
+    frutas_player2 = [f for f in lado2.split() if f != '-']
 
-
-@bot.command(name="comparar", help="Compara o valor de até 4 frutas de cada lado de uma troca. Use o formato: !comparar (fruta1 fruta2) (fruta3 fruta4). Use '-' para espaços vazios.")
-async def comparar(ctx, *args):
-
-    entrada = " ".join(args)
-
- 
-    if entrada.count('(') != 2 or entrada.count(')') != 2:
-        await ctx.send("❌ Formato de comando incorreto. Use: `!comparar (fruta1 fruta2) (fruta3 fruta4)`")
-        return
-
-
-    try:
-        parte1_str = entrada.split(')')[0].replace('(', '').strip()
-        parte2_str = entrada.split(')')[1].replace('(', '').strip()
-        
-  
-        frutas_player1 = [f for f in parte1_str.split() if f != '-']
-        frutas_player2 = [f for f in parte2_str.split() if f != '-']
-    except IndexError:
-        await ctx.send("❌ Erro ao processar o formato. Verifique se há espaços e parênteses corretos.")
-        return
-
-  
     valor_player1, frutas_encontradas1 = calcular_valor_total(frutas_player1)
     valor_player2, frutas_encontradas2 = calcular_valor_total(frutas_player2)
 
-   
     lista_player1 = ", ".join(frutas_encontradas1) if frutas_encontradas1 else "Nenhuma fruta válida"
     lista_player2 = ", ".join(frutas_encontradas2) if frutas_encontradas2 else "Nenhuma fruta válida"
-    
 
     if valor_player1 > valor_player2:
         resultado = f"✅ **Jogador 1** leva vantagem!"
@@ -136,7 +128,6 @@ async def comparar(ctx, *args):
     else:
         resultado = f"⚖️ A troca é justa!"
 
-    
     mensagem_final = (
         f"**Comparação de Troca:**\n"
         f"**Lado 1 ({lista_player1}):** {valor_player1:,} Beli\n"
@@ -144,7 +135,7 @@ async def comparar(ctx, *args):
         f"\n"
         f"{resultado}"
     )
-    
-    await ctx.send(mensagem_final)
+
+    await interaction.response.send_message(mensagem_final)
 
 bot.run(TOKEN)
